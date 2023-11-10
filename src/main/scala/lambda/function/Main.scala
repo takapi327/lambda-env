@@ -1,6 +1,6 @@
 package lambda.function
 
-import java.util.{ Collections, Map => JavaMap }
+//import java.util.{ Collections, Map => JavaMap }
 
 import scala.jdk.CollectionConverters._
 
@@ -28,7 +28,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
         val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
         println(s"config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(s"key: $key")
-        setEnv(Map(key -> result.getParameter.getValue, v.getMessage -> result.getParameter.getValue))
+        //setEnv(Map(key -> result.getParameter.getValue))
         println(s"System get: ${System.getenv(key)}")
         println(s"set env config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(result.getParameter.getValue)
@@ -42,6 +42,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
     None
   }
 
+  /*
   private def setEnv(newEnv: Map[String, String]): Unit = {
     val nowEnv = System.getenv()
     try {
@@ -54,6 +55,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
       theCaseInsensitiveEnvironmentField.setAccessible(true)
       val cienv = theCaseInsensitiveEnvironmentField.get(null).asInstanceOf[JavaMap[String, String]]
       cienv.putAll((nowEnv.asScala ++ newEnv).asJava)
+      println("1の方法が成功")
     } catch {
       case _: NoSuchFieldException =>
         try {
@@ -67,6 +69,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
               val map = obj.asInstanceOf[JavaMap[String, String]]
               map.clear()
               map.putAll((nowEnv.asScala ++ newEnv).asJava)
+              println("2の方法が成功")
             }
           }
         } catch {
@@ -75,4 +78,5 @@ object Main extends RequestHandler[SNSEvent, Unit] {
       case ex: Exception => ex.printStackTrace()
     }
   }
+   */
 }
