@@ -46,10 +46,9 @@ object Main extends RequestHandler[SNSEvent, Unit] {
   private def updateEnvironmentVariable(key: String, value: String): Unit = {
     // 現在の環境変数を取得
     val env = System.getenv()
-    // 環境変数を更新
-    env.put(key, value)
+
     // 更新後の環境変数を設定
-    updateEnvironment(env.asScala.toMap)
+    updateEnvironment(Map(key -> value) ++ env)
   }
 
   private def updateEnvironment(newEnv: Map[String, String]): Unit = {
