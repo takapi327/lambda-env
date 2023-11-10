@@ -43,7 +43,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
   }
 
   private def setEnv(newEnv: Map[String, String]): Unit = {
-    println(s"現在の環境変数: ${System.getenv()}")
+    //println(s"現在の環境変数: ${System.getenv()}")
     try {
       val processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment")
       val theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment")
@@ -68,7 +68,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
               val map = obj.asInstanceOf[JavaMap[String, String]]
               map.putAll(newEnv.asJava)
               println("2の方法が成功")
-              println(s"更新後の環境変数: ${System.getenv()}")
+              //println(s"更新後の環境変数: ${System.getenv()}")
             }
           }
         } catch {
