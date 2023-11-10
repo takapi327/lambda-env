@@ -1,6 +1,6 @@
 package lambda.function
 
-import java.util.{ Collections, Map => JavaMap }
+//import java.util.{ Collections, Map => JavaMap }
 
 import scala.jdk.CollectionConverters._
 
@@ -28,11 +28,10 @@ object Main extends RequestHandler[SNSEvent, Unit] {
         val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
         println(s"config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(s"key: $key")
+        updateEnvironmentVariable(key, result.getParameter.getValue)
         //setEnv(Map(key -> result.getParameter.getValue, v.getMessage -> result.getParameter.getValue))
-        System.setProperty(key, result.getParameter.getValue)
         println(s"System get: ${System.getenv(key)}")
         println(s"set env config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
-        println(s"set env key: $key")
         println(result.getParameter.getValue)
       case None => println("No Data")
     }
@@ -44,12 +43,36 @@ object Main extends RequestHandler[SNSEvent, Unit] {
     None
   }
 
+  private def updateEnvironmentVariable(key: String, value: String): Unit = {
+    // 現在の環境変数を取得
+    val env = System.getenv()
+    // 環境変数を更新
+    env.put(key, value)
+    // 更新後の環境変数を設定
+    updateEnvironment(env.asScala.toMap)
+  }
+
+  private def updateEnvironment(newEnv: Map[String, String]): Unit = {
+    try {
+      // Java 9以降では、ProcessBuilder#environmentメソッドを使用して環境変数を更新
+      val processBuilder: ProcessBuilder = new ProcessBuilder()
+      val env = processBuilder.environment()
+      env.clear()
+      env.putAll(newEnv.asJava)
+    } catch {
+      case ex: Exception => ex.printStackTrace()
+    }
+  }
+
+  /*
   private def setEnv(newEnv: Map[String, String]): Unit = {
     try {
+      val oldEnv = System.getenv()
       val processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment")
       val theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment")
       theEnvironmentField.setAccessible(true)
       val env = theEnvironmentField.get(null).asInstanceOf[JavaMap[String, String]]
+      val test = oldEnv.putAll(newEnv.asJava)
       env.putAll(newEnv.asJava)
       val theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment")
       theCaseInsensitiveEnvironmentField.setAccessible(true)
@@ -76,4 +99,5 @@ object Main extends RequestHandler[SNSEvent, Unit] {
       case ex: Exception => ex.printStackTrace()
     }
   }
+   */
 }
