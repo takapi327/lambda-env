@@ -15,8 +15,6 @@ import com.typesafe.config._
 
 object Main extends RequestHandler[SNSEvent, Unit] {
 
-  private val config = ConfigFactory.load()
-
   private val ssmClient: AWSSimpleSystemsManagement = AWSSimpleSystemsManagementClientBuilder.defaultClient()
   private def buildRequest(key: String) =
     new GetParameterRequest().withName(key).withWithDecryption(true)
@@ -28,18 +26,17 @@ object Main extends RequestHandler[SNSEvent, Unit] {
       case Some(v) =>
         val key = System.getenv(v.getMessage)
         val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
-        println(s"config get test: ${configValue("test")}")
-        println(s"config get: ${configValue(v.getMessage)}")
+        println(s"config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(s"key: $key")
         setEnv(Map(key -> result.getParameter.getValue))
-        println(s"set env config get: ${configValue(v.getMessage)}")
+        println(s"set env config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(s"set env key: $key")
         println(result.getParameter.getValue)
       case None => println("No Data")
     }
   }
 
-  private def configValue(key: String): Option[String] = if ((config.hasPath(key) && !config.getIsNull(key))) {
+  private def configValue(config: Config, key: String): Option[String] = if (config.hasPath(key) && !config.getIsNull(key)) {
     Some(config.getString(key))
   } else {
     None
