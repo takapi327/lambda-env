@@ -31,6 +31,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
         setEnv(Map(key -> result.getParameter.getValue, v.getMessage -> result.getParameter.getValue))
         System.setProperty(key, result.getParameter.getValue)
         println(s"set env config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
+        println(s"System get: ${System.getenv(key)}")
         println(s"set env key: $key")
         println(result.getParameter.getValue)
       case None => println("No Data")
