@@ -1,6 +1,6 @@
 package lambda.function
 
-//import java.util.{ Collections, Map => JavaMap }
+import java.util.{ Collections, Map => JavaMap }
 
 import scala.jdk.CollectionConverters._
 
@@ -42,9 +42,9 @@ object Main extends RequestHandler[SNSEvent, Unit] {
     None
   }
 
-  /*
   private def setEnv(newEnv: Map[String, String]): Unit = {
     val nowEnv = System.getenv()
+    println(s"現在の環境変数: $nowEnv")
     try {
       val processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment")
       val theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment")
@@ -78,5 +78,4 @@ object Main extends RequestHandler[SNSEvent, Unit] {
       case ex: Exception => ex.printStackTrace()
     }
   }
-   */
 }
