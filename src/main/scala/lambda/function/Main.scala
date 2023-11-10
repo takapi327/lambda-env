@@ -1,6 +1,6 @@
 package lambda.function
 
-//import java.util.{ Collections, Map => JavaMap }
+import java.util.{ Collections, Map => JavaMap }
 
 import scala.jdk.CollectionConverters._
 
@@ -28,8 +28,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
         val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
         println(s"config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(s"key: $key")
-        updateEnvironmentVariable(key, result.getParameter.getValue)
-        //setEnv(Map(key -> result.getParameter.getValue, v.getMessage -> result.getParameter.getValue))
+        setEnv(Map(key -> result.getParameter.getValue, v.getMessage -> result.getParameter.getValue))
         println(s"System get: ${System.getenv(key)}")
         println(s"set env config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(result.getParameter.getValue)
@@ -43,40 +42,18 @@ object Main extends RequestHandler[SNSEvent, Unit] {
     None
   }
 
-  private def updateEnvironmentVariable(key: String, value: String): Unit = {
-    // 現在の環境変数を取得
-    val env = System.getenv()
-
-    // 更新後の環境変数を設定
-    updateEnvironment(env.asScala.toMap ++ Map(key -> value))
-  }
-
-  private def updateEnvironment(newEnv: Map[String, String]): Unit = {
-    try {
-      // Java 9以降では、ProcessBuilder#environmentメソッドを使用して環境変数を更新
-      val processBuilder: ProcessBuilder = new ProcessBuilder()
-      val env = processBuilder.environment()
-      env.clear()
-      env.putAll(newEnv.asJava)
-    } catch {
-      case ex: Exception => ex.printStackTrace()
-    }
-  }
-
-  /*
   private def setEnv(newEnv: Map[String, String]): Unit = {
+    val nowEnv = System.getenv()
     try {
-      val oldEnv = System.getenv()
       val processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment")
       val theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment")
       theEnvironmentField.setAccessible(true)
       val env = theEnvironmentField.get(null).asInstanceOf[JavaMap[String, String]]
-      val test = oldEnv.putAll(newEnv.asJava)
-      env.putAll(newEnv.asJava)
+      env.putAll((nowEnv.asScala ++ newEnv).asJava)
       val theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment")
       theCaseInsensitiveEnvironmentField.setAccessible(true)
       val cienv = theCaseInsensitiveEnvironmentField.get(null).asInstanceOf[JavaMap[String, String]]
-      cienv.putAll(newEnv.asJava)
+      cienv.putAll((nowEnv.asScala ++ newEnv).asJava)
     } catch {
       case _: NoSuchFieldException =>
         try {
@@ -89,7 +66,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
               val obj = field.get(env)
               val map = obj.asInstanceOf[JavaMap[String, String]]
               map.clear()
-              map.putAll(newEnv.asJava)
+              map.putAll((nowEnv.asScala ++ newEnv).asJava)
             }
           }
         } catch {
@@ -98,5 +75,4 @@ object Main extends RequestHandler[SNSEvent, Unit] {
       case ex: Exception => ex.printStackTrace()
     }
   }
-   */
 }
