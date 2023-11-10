@@ -7,9 +7,6 @@ lazy val root = (project in file("."))
     name := "lambda-env",
     scalaVersion := "2.13.11",
     run / fork := true,
-    run / javaOptions ++= Seq(
-      "-Dconfig.resource=application.conf",
-    ),
     scalacOptions ++= Seq(
       "-deprecation",
       "-feature",
@@ -25,10 +22,7 @@ lazy val root = (project in file("."))
       "com.amazonaws" % "aws-lambda-java-runtime-interface-client" % "2.3.1",
       "com.amazonaws" % "aws-java-sdk-sns" % "1.12.583",
       "com.amazonaws" % "aws-java-sdk-ssm" % "1.12.583",
-    ),
-    Universal / mappings += {
-      ((Compile / resourceDirectory).value / s"application.conf") -> "application.conf"
-    }
+    )
   )
   .enablePlugins(EcrPlugin)
   .enablePlugins(JavaAppPackaging)
