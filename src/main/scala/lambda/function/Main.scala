@@ -30,7 +30,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
         val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
         println(s"config get: ${config.getString(v.getMessage)}")
         println(s"key: $key")
-        setEnv(Map(v.getMessage -> result.getParameter.getValue))
+        setEnv(Map(key -> result.getParameter.getValue))
         println(s"set env config get: ${config.getString(v.getMessage)}")
         println(s"set env key: $key")
         println(result.getParameter.getValue)
