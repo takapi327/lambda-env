@@ -33,7 +33,10 @@ dockerBaseImage := "amazoncorretto:11"
 Docker / daemonUserUid := None
 Docker / daemonUser := "daemon"
 dockerEntrypoint := Seq(
-  "/var/lang/bin/java", "-cp", "/opt/docker/lib/*", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda"
+  "java",
+  "-cp",
+  "/opt/docker/lib/*",
+  "com.amazonaws.services.lambda.runtime.api.client.AWSLambda"
 )
 
 import com.amazonaws.regions.{ Region, Regions }
