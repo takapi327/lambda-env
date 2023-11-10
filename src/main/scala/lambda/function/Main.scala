@@ -28,7 +28,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
         val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
         println(s"config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(s"key: $key")
-        //setEnv(Map(key -> result.getParameter.getValue))
+        setEnv(Map(key -> result.getParameter.getValue))
         println(s"System get: ${System.getenv(key)}")
         println(s"set env config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
         println(result.getParameter.getValue)
@@ -70,6 +70,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
               map.clear()
               map.putAll((nowEnv.asScala ++ newEnv).asJava)
               println("2の方法が成功")
+              println(s"更新後の環境変数: ${System.getenv()}")
             }
           }
         } catch {
