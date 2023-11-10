@@ -43,18 +43,17 @@ object Main extends RequestHandler[SNSEvent, Unit] {
   }
 
   private def setEnv(newEnv: Map[String, String]): Unit = {
-    val nowEnv = System.getenv()
-    println(s"現在の環境変数: $nowEnv")
+    println(s"現在の環境変数: ${System.getenv()}")
     try {
       val processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment")
       val theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment")
       theEnvironmentField.setAccessible(true)
       val env = theEnvironmentField.get(null).asInstanceOf[JavaMap[String, String]]
-      env.putAll((nowEnv.asScala ++ newEnv).asJava)
+      env.putAll(newEnv.asJava)
       val theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment")
       theCaseInsensitiveEnvironmentField.setAccessible(true)
       val cienv = theCaseInsensitiveEnvironmentField.get(null).asInstanceOf[JavaMap[String, String]]
-      cienv.putAll((nowEnv.asScala ++ newEnv).asJava)
+      cienv.putAll(newEnv.asJava)
       println("1の方法が成功")
     } catch {
       case _: NoSuchFieldException =>
@@ -67,8 +66,7 @@ object Main extends RequestHandler[SNSEvent, Unit] {
               field.setAccessible(true)
               val obj = field.get(env)
               val map = obj.asInstanceOf[JavaMap[String, String]]
-              map.clear()
-              map.putAll((nowEnv.asScala ++ newEnv).asJava)
+              map.putAll(newEnv.asJava)
               println("2の方法が成功")
               println(s"更新後の環境変数: ${System.getenv()}")
             }
