@@ -26,11 +26,14 @@ object Main extends RequestHandler[SNSEvent, Unit] {
     val sns = rows.headOption.map(_.getSNS)
     sns match {
       case Some(v) =>
-        val result: GetParameterResult = ssmClient.getParameter(buildRequest(v.getMessage))
-        println(config.getString(v.getMessage))
+        val key = System.getenv(v.getMessage)
+        val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
+        println(s"config get: ${config.getString(v.getMessage)}")
+        println(s"key: $key")
         setEnv(Map(v.getMessage -> result.getParameter.getValue))
+        println(s"set env config get: ${config.getString(v.getMessage)}")
+        println(s"set env key: $key")
         println(result.getParameter.getValue)
-        println(config.getString(v.getMessage))
       case None => println("No Data")
     }
   }
