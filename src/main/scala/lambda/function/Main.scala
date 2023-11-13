@@ -19,20 +19,20 @@ object Main extends RequestHandler[SNSEvent, Unit] {
   private def buildRequest(key: String) =
     new GetParameterRequest().withName(key).withWithDecryption(true)
 
+  private val key = System.getenv("taskKey")
+  private val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
+  println(s"config get: ${configValue(ConfigFactory.load(),"taskKey")}")
+  println(s"key: $key")
+  setEnv(Map(key -> result.getParameter.getValue))
+  println(result.getParameter.getValue)
+
   override def handleRequest(input: SNSEvent, context: Context): Unit = {
     val rows = input.getRecords.asScala
     val sns = rows.headOption.map(_.getSNS)
     sns match {
       case Some(v) =>
-        val key = System.getenv(v.getMessage)
-        val result: GetParameterResult = ssmClient.getParameter(buildRequest(key))
-        println(s"config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
-        println(s"key: $key")
-        setEnv(Map(key -> result.getParameter.getValue))
         println(s"System get: ${System.getenv(key)}")
-        Thread.sleep(10)
-        println(s"set env config get: ${configValue(ConfigFactory.load(), v.getMessage)}")
-        println(result.getParameter.getValue)
+        println(s"set env config get: ${configValue(ConfigFactory.load(), "taskKey")}")
       case None => println("No Data")
     }
   }
@@ -44,7 +44,6 @@ object Main extends RequestHandler[SNSEvent, Unit] {
   }
 
   private def setEnv(newEnv: Map[String, String]): Unit = {
-    //println(s"現在の環境変数: ${System.getenv()}")
     try {
       val processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment")
       val theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment")
@@ -69,7 +68,6 @@ object Main extends RequestHandler[SNSEvent, Unit] {
               val map = obj.asInstanceOf[JavaMap[String, String]]
               map.putAll(newEnv.asJava)
               println("2の方法が成功")
-              //println(s"更新後の環境変数: ${System.getenv()}")
             }
           }
         } catch {
